@@ -106,3 +106,28 @@ func test_mint_two_projects{syscall_ptr : felt*, range_check_ptr, pedersen_ptr :
 
     return ()
 end
+
+@view
+func test_mint_two_tokens{syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*}():
+    alloc_locals
+    local bea_address : felt
+    %{ ids.bea_address = deploy_contract("./lib/cairo_contracts/src/openzeppelin/account/Account.cairo", [69]).contract_address %}
+
+    let (id) = addProject(Project('planets', 0xB0B, 100, 0))
+
+    let (pre_invocations) = getInvocations(id)
+    assert pre_invocations = 0
+
+    let to = bea_address
+    let (tokenId1) = mint(to, id)
+    let (post_invocations) = getInvocations(id)
+
+    assert tokenId1 = id * ONE_MILLION + pre_invocations
+
+    let (tokenId2) = mint(to, id)
+
+    assert tokenId2 = id * ONE_MILLION + post_invocations
+
+    return ()
+end
+
